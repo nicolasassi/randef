@@ -12,7 +12,7 @@ class RefGen(Sources):
     edition_types = ['regular', 'full', 'special']
     source_types = ['periodic', 'journal', 'magazine']
     help_types = ['tradução', 'prefácio', 'notas', 'atualização', 'atualizações' 'ilustação','ilustrações', 'revisão', 'revisões', 'edição', 'edições', 'direção', 'coeditor', 'coedição', 'coord.', 'assist.', 'coordenação', 'assistência']
-    work_types = ['Dissertação', 'Tese', 'Trabalho de conclusão de courso', 'TCC', 'Projeto de pesquisa']
+    work_types = ['Dissertação', 'Tese', 'Trabalho de conclusão de curso', 'TCC', 'Projeto de pesquisa']
     br_grad_types = ['Mestrado', 'Doutorado', 'Graduação', 'Pós-graduação', 'Tecnólogo', 'Licenciatura', 'Bacharelado', 'Especialização', 'PhD']
     event_type = ['anais', 'atas', 'resultados', 'proceedings']
     ediion_types = ['regular', 'full']
@@ -62,7 +62,7 @@ class RefGen(Sources):
                 if random.randint(1, 100) <= 2:
                     complement = self._pick_city()
                     return '{} ({})'.format(city, complement)
-            return '{}, '.format(city.title())
+            return city.title()
         else:
             return '[S.l.]'
 

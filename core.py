@@ -181,7 +181,7 @@ def academic(refgen):
     ac_type = refgen.make_academic_type()
     grad_in = refgen.make_graduation_in()
     author = Authors()
-    where = author.get_research_orgs(1)
+    where = author.get_research_orgs(1)[0]
     ref_ref.append({'what_where':'{} {} - {}'.format(ac_type, grad_in, where)})
     if random.randint(1, 100) in range(90):
         city = refgen.make_city()
@@ -190,16 +190,27 @@ def academic(refgen):
     ref_ref.append({'city': city})
     year2 = refgen.make_year(random.choice(refgen.year_types))
     ref_ref.append({'year': year})
-    return ' {}. {}. {} {} {} - {}, {}, {}.'.format(adv, year, f, ac_type, grad_in, where, city, year2), ref_ref
+    return ' {}. {}. {}. {} {} - {}, {}, {}.'.format(adv, year, f, ac_type, grad_in, where, city, year2), ref_ref
 
 def finish(refgen):
     things = ''
-    things_that_could_go = [refgen.make_e_reference, refgen.make_doi, refgen.make_complementary_notes]
+    ref_ref = list()
+    things_that_could_go = [
+        {'link': refgen.make_e_reference}, {'doi': refgen.make_doi}, {'notes':refgen.make_complementary_notes}]
     how_many = random.randint(1, 3)
-    choices = random.choices(things_that_could_go, how_many)
+    choices = random.sample(things_that_could_go, how_many)
     for choice in choices:
-        things += ' {}.'.format(choice())
-    return things
+        k = list(choice.keys())[0]
+        if k == 'link':
+            if random.randint(1, 2) == 1:
+                value = list(choice.values())[0]('updated')
+            else:
+                value = list(choice.values())[0]('deprecated')
+        else:
+            value = list(choice.values())[0]()
+        ref_ref.append({k: value})
+        things += ' {}.'.format(value)
+    return things, ref_ref
 
 def clean(text):
     found = re.findall(r'[\\\(\)\.\-\^\'\"\*\+\[\]\$\?\<\>\=\{\}\_]', text)
@@ -215,13 +226,12 @@ def re_func(ref, match):
     except:
         raise ValueError
 
-
 import datetime
 now = datetime.datetime.now()
 refgen = RefGen()
 with open('noice8.jsonl', 'a+', encoding='utf-8') as f:
     for text, ref in make_author_title(2):
-        if random.randint(1, 100) in range(66):
+        if random.randint(1, 100) in range(90):
             ap, ref_ref = standard(refgen)
             text += ' {}'.format(ap)
             ref.extend(ref_ref)
@@ -232,6 +242,10 @@ with open('noice8.jsonl', 'a+', encoding='utf-8') as f:
         else:
             ap, ref_ref = academic(refgen)
             text += ' {}'.format(ap)
+            ref.extend(ref_ref)
+        if random.randint(1, 100) in range(20):
+            ap, ref_ref = finish(refgen)
+            text += '{}'.format(ap)
             ref.extend(ref_ref)
         ents = {'entities': []}
         ents['text'] = text
