@@ -1,3 +1,4 @@
 db/sources.db
 venv/
 .vscode/
+__pycache__/

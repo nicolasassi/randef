@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from authors import Authors
 from titles import Titles
 import re
 import json
 import random
-from os import listdir
+from refgen import RefGen
 
 def regular(author_class, title_class, iters=1, max_authors=7, max_names=5, max_surnames=4):
     for _ in range(iters):
@@ -78,7 +80,7 @@ def state_owned_research_orgs(author_class, title_class, iters=1, max_research_o
                 yield ('{}. {}.'.format(author_done, title), [{'author': author_done},
                 {'title': title}])
 
-def with_partcipation_tag(author_class, title_class, iters=1, max_authors=7, max_names=5, max_surnames=4):
+def with_participation_tag(author_class, title_class, iters=1, max_authors=7, max_names=5, max_surnames=4):
     for _ in range(iters):
         for authors in range(1, max_authors):
             for names in range(1, max_names):
@@ -121,9 +123,83 @@ def make_author_title(each_poss=1):
         yield ref
     for ref in state_owned_research_orgs(authors, titles, iters=each_poss):
         yield ref
-    for ref in with_partcipation_tag(authors, titles, iters=each_poss):
+    for ref in with_participation_tag(authors, titles, iters=each_poss):
         yield ref
 
+
+def standard(refgen):
+    ref_ref = list()
+    edition = refgen.make_edition(random.choice(refgen.edition_types))
+    ref_ref.append({'edition': edition})
+    if random.randint(1, 100) in range(90):
+        city = refgen.make_city()
+    else:
+        city = refgen.make_city(loco=False)
+    ref_ref.append({'city':city})
+    if random.randint(1, 100) in range(90):
+        editor = refgen.get_editor()
+    else:
+        editor = refgen.get_editor(nomine=False)
+    ref_ref.append({'editor':editor})
+    year = refgen.make_year(random.choice(refgen.year_types))
+    ref_ref.append({'year': year})
+    return '{}. {}: {}, {}.'.format(edition, city, editor, year), ref_ref
+
+def standard_plus_vol_cap_num_pag(refgen):
+    ref = ''
+    if random.randint(1, 100) in range(10):
+        vol = refgen.make_vol()
+        ref_ref.append({'vol': vol})
+        ref += ' {}.'.format(vol)
+    if random.randint(1, 100) in range(10):
+        cap = refgen.make_cap()
+        ref_ref.append({'cap': cap})
+        ref += ' {}.'.format(cap)
+    if random.randint(1, 100) in range(10):
+        num = refgen.make_num()
+        ref_ref.append({'num': num})
+        ref += ' {}.'.format(num)
+    if random.randint(1, 100) in range(30):
+        if random.randint(1, 100) in range(50):
+            page = refgen.make_pag()
+            ref_ref.append({'page': page})
+            ref += ' {}.'.format(page)
+        else:
+            pages = refgen.make_pags()
+            ref_ref.append({'pages': pages})
+            ref += ' {}.'.format(pages)
+    return ref, ref_ref
+
+def academic(refgen):
+    ref_ref = list()
+    adv = refgen.add_advisor()
+    ref_ref.append({'advisor': adv})
+    year = refgen.make_year(random.choice(refgen.year_types))
+    ref_ref.append({'year': adv})
+    f = refgen.make_folhas()
+    ref_ref.append({'folhas': f})
+    ac_type = refgen.make_academic_type()
+    grad_in = refgen.make_graduation_in()
+    author = Authors()
+    where = author.get_research_orgs(1)
+    ref_ref.append({'what_where':'{} {} - {}'.format(ac_type, grad_in, where)})
+    if random.randint(1, 100) in range(90):
+        city = refgen.make_city()
+    else:
+        city = refgen.make_city(loco=False)
+    ref_ref.append({'city': city})
+    year2 = refgen.make_year(random.choice(refgen.year_types))
+    ref_ref.append({'year': year})
+    return ' {}. {}. {} {} {} - {}, {}, {}.'.format(adv, year, f, ac_type, grad_in, where, city, year2), ref_ref
+
+def finish(refgen):
+    things = ''
+    things_that_could_go = [refgen.make_e_reference, refgen.make_doi, refgen.make_complementary_notes]
+    how_many = random.randint(1, 3)
+    choices = random.choices(things_that_could_go, how_many)
+    for choice in choices:
+        things += ' {}.'.format(choice())
+    return things
 
 def clean(text):
     found = re.findall(r'[\\\(\)\.\-\^\'\"\*\+\[\]\$\?\<\>\=\{\}\_]', text)
@@ -142,8 +218,21 @@ def re_func(ref, match):
 
 import datetime
 now = datetime.datetime.now()
+refgen = RefGen()
 with open('noice8.jsonl', 'a+', encoding='utf-8') as f:
-    for text, ref in make_author_title(10000):
+    for text, ref in make_author_title(2):
+        if random.randint(1, 100) in range(66):
+            ap, ref_ref = standard(refgen)
+            text += ' {}'.format(ap)
+            ref.extend(ref_ref)
+            if random.randint(1, 2) == 1:
+                ap, ref_ref = standard_plus_vol_cap_num_pag(refgen)
+                text += '{}'.format(ap)
+                ref.extend(ref_ref)
+        else:
+            ap, ref_ref = academic(refgen)
+            text += ' {}'.format(ap)
+            ref.extend(ref_ref)
         ents = {'entities': []}
         ents['text'] = text
         try:
@@ -155,10 +244,3 @@ with open('noice8.jsonl', 'a+', encoding='utf-8') as f:
             continue
         f.write(json.dumps(ents, ensure_ascii=False)+'\n')
 print(datetime.datetime.now()-now)
-
-# files = listdir('done')
-# with open('super_noicet.jsonl', 'w+', encoding='utf-8') as f:
-#     for file in files:
-#         with open('done/{}'.format(file), 'r', encoding='utf-8', newline='') as fr:
-#             for line in fr.readlines():
-#                 f.write(line)

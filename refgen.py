@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from sources import Sources
 import random
 import string
@@ -7,23 +9,25 @@ class RefGen(Sources):
 
     months = {1: 'jan', 2: 'fev', 3: 'mar', 4: 'abr', 5: 'maio', 6: 'jun', 7: 'jul', 8: 'ago', 9: 'set', 10: 'out', 11: 'nov', 12: 'dez'}
     year_types = ['regular', 'uncertain', 'right_decade', 'prob_year', 'aprox_decade', 'circa_decade', 'between_decades']
+    edition_types = ['regular', 'full', 'special']
     source_types = ['periodic', 'journal', 'magazine']
-    help_types = ['tradução', 'prefácio', 'notas', 'atualização', 'atualizações' 'ilustação',
-    'ilustrações', 'revisão', 'revisões', 'edição', 'edições', 'direção', 'coeditor', 'coedição', 'coord.', 'assist.', 'coordenação', 'assistência']
+    help_types = ['tradução', 'prefácio', 'notas', 'atualização', 'atualizações' 'ilustação','ilustrações', 'revisão', 'revisões', 'edição', 'edições', 'direção', 'coeditor', 'coedição', 'coord.', 'assist.', 'coordenação', 'assistência']
     work_types = ['Dissertação', 'Tese', 'Trabalho de conclusão de courso', 'TCC', 'Projeto de pesquisa']
     br_grad_types = ['Mestrado', 'Doutorado', 'Graduação', 'Pós-graduação', 'Tecnólogo', 'Licenciatura', 'Bacharelado', 'Especialização', 'PhD']
     event_type = ['anais', 'atas', 'resultados', 'proceedings']
+    ediion_types = ['regular', 'full']
 
     def __init__(self):
         super(RefGen, self).__init__()
 
     @staticmethod
     def make_edition(type):
+        ed = random.randint(1, 30)
         if type == 'regular':
-            ed = random.randint(1, 30)
             return '{}. ed'.format(ed)
-        else:
-            ed = random.randint(1, 30)
+        elif type == 'full':
+            return '{}º Edição'.format(ed)
+        elif type == 'special':
             return '{}th. ed'.format(ed)
 
     @staticmethod
@@ -65,12 +69,12 @@ class RefGen(Sources):
     @staticmethod
     def make_pag():
         pag = random.randint(1, 1000)
-        return '{} p'.format(pag)
+        return '{} p'.format(str(pag))
 
     @staticmethod
     def make_pags():
-        pags = [random.randint(1, 2000) for _ in range(2)]
-        return 'p. {} '.format('-'.join(pags))
+        pags = [str(random.randint(1, 2000)) for _ in range(2)]
+        return 'p. {}'.format('-'.join(pags))
 
     @staticmethod
     def make_folhas():
