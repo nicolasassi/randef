@@ -230,7 +230,7 @@ import datetime
 now = datetime.datetime.now()
 refgen = RefGen()
 with open('noice8.jsonl', 'a+', encoding='utf-8') as f:
-    for text, ref in make_author_title(2):
+    for text, ref in make_author_title(10000):
         if random.randint(1, 100) in range(90):
             ap, ref_ref = standard(refgen)
             text += ' {}'.format(ap)
