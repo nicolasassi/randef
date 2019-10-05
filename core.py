@@ -264,8 +264,11 @@ def re_func(ref, match):
 import datetime
 now = datetime.datetime.now()
 refgen = RefGen()
-with open('noice8.jsonl', 'a+', encoding='utf-8') as f:
-    for text, ref in make_author_title(500):
+cntr = 0
+with open('noice.jsonl', 'a+', encoding='utf-8') as f:
+    for text, ref in make_author_title(1000):
+        if cntr % 100 == 0:
+            print("working on interation: ", cntr)
         if random.randint(1, 100) in range(90):
             ap, ref_ref = standard(refgen)
             text += ' {}'.format(ap)
@@ -292,4 +295,5 @@ with open('noice8.jsonl', 'a+', encoding='utf-8') as f:
         except ValueError:
             continue
         f.write(json.dumps(ents, ensure_ascii=False)+'\n')
+        cntr += 1
 print(datetime.datetime.now()-now)
