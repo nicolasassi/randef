@@ -239,7 +239,7 @@ def clean(text):
         # text = re.sub(f, '\{}'.format(f), text)
     return text
 
-punct = re.compile(r"[!\\\"#$%&'()*+,\-./:;<=>?@\[\]¨\^\_\x60\{\|\}\~]")
+punct = re.compile(r"[\!\\\"\#\$\%\&\'\(\)\*\+\,\-\.\/\:\;\<\=\>\?\@\[\]\¨\^\_\x60\{\|\}\~]")
 
 def is_punct(token):
     if punct.match(token):
@@ -265,11 +265,10 @@ def find_next_punct(match, end):
     return next_token
 
 def re_func(ref, match):
-    f = re.search('{}'.format(clean(match.lower())), ref.lower())
     try:
+        f = re.search('{}'.format(clean(match.lower())), ref.lower())
         return find_last_punct(ref, f.start()), find_next_punct(ref, f.end())
-    except Exception as e:
-        print(e)
+    except:
         raise ValueError
 
 import datetime
