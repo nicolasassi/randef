@@ -23,7 +23,10 @@ def regular(author_class, title_class, iters=1, max_authors=7, max_names=5, max_
                     refs.append({'title': title})
                     authors_list_str = '; '.join(authors_list)
                     if authors_list_str.endswith("."):
-                        yield ('{} {}.'.format('; '.join(authors_list), title), refs)
+                        if random.randint(1, 100) in range(20):
+                            yield ('{} {}.'.format('; '.join(authors_list), title), refs)
+                        else:
+                            yield ('{}. {}.'.format('; '.join(authors_list), title), refs)
                     else:
                         yield ('{}. {}.'.format('; '.join(authors_list), title), refs)
 
@@ -74,8 +77,12 @@ def state_owned_research_orgs(author_class, title_class, iters=1, max_research_o
             author_done = '. '.join(research_org)
             title = title_class.format_title(title_class.pick_title())
             if author_done.endswith("."):
-                yield ('{} {}.'.format(author_done, title), [{'author': author_done},
-                {'title': title}])
+                if random.randint(1, 100) in range(20):
+                    yield ('{} {}.'.format(author_done, title), [{'author': author_done},
+                    {'title': title}])
+                else:
+                    yield ('{}. {}.'.format(author_done, title), [{'author': author_done},
+                    {'title': title}])
             else:
                 yield ('{}. {}.'.format(author_done, title), [{'author': author_done},
                 {'title': title}])
@@ -104,7 +111,10 @@ def with_participation_tag(author_class, title_class, iters=1, max_authors=7, ma
                     refs.append({'title': title})
                     authors_list_str = '; '.join(authors_list)
                     if authors_list_str.endswith("."):
-                        yield ('{} {}.'.format('; '.join(authors_list), title), refs)
+                        if random.randint(1, 100) in range(20):
+                            yield ('{} {}.'.format('; '.join(authors_list), title), refs)
+                        else:
+                            yield ('{}. {}.'.format('; '.join(authors_list), title), refs)
                     else:
                         yield ('{}. {}.'.format('; '.join(authors_list), title), refs)
 
@@ -219,10 +229,35 @@ def clean(text):
         # text = re.sub(f, '\{}'.format(f), text)
     return text
 
+punct = re.compile(r"[!\\\"#$%&'()*+,\-./:;<=>?@\[\]¨\^\_\x60\{\|\}\~]")
+
+def is_punct(token):
+    if punct.match(token):
+        return True
+    return False
+
+def find_last_punct(match, start):
+    last_token = 0
+    for i, m in enumerate(match):
+        if i == start:
+            return last_token
+        if is_punct(m):
+            last_token = i
+    return last_token
+
+def find_next_punct(match, end):
+    next_token = len(match)
+    for i, m in enumerate(match):
+        if i <= start:
+            continue
+        if is_punct(m):
+            next_token = i
+    return next_token
+
 def re_func(ref, match):
     f = re.search('{}'.format(clean(match.lower())), ref.lower())
     try:
-        return f.start(), f.end()
+        return find_last_punct(match, f.start()), find_next_punct(match, f.end())
     except:
         raise ValueError
 
