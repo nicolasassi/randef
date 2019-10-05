@@ -151,12 +151,16 @@ def standard(refgen):
     else:
         editor = refgen.get_editor(nomine=False)
     ref_ref.append({'editor':editor})
-    year = refgen.make_year(random.choice(refgen.year_types))
+    if random.randint(1, 100) in range(90):
+        year = refgen.make_year('regular')
+    else:
+        year = refgen.make_year(random.choice(refgen.year_types[1:]))
     ref_ref.append({'year': year})
     return '{}. {}: {}, {}.'.format(edition, city, editor, year), ref_ref
 
 def standard_plus_vol_cap_num_pag(refgen):
     ref = ''
+    ref_ref = list()
     if random.randint(1, 100) in range(10):
         vol = refgen.make_vol()
         ref_ref.append({'vol': vol})
@@ -184,8 +188,11 @@ def academic(refgen):
     ref_ref = list()
     adv = refgen.add_advisor()
     ref_ref.append({'advisor': adv})
-    year = refgen.make_year(random.choice(refgen.year_types))
-    ref_ref.append({'year': adv})
+    if random.randint(1, 100) in range(90):
+        year = refgen.make_year('regular')
+    else:
+        year = refgen.make_year(random.choice(refgen.year_types[1:]))
+    ref_ref.append({'year': year})
     f = refgen.make_folhas()
     ref_ref.append({'folhas': f})
     ac_type = refgen.make_academic_type()
@@ -198,7 +205,10 @@ def academic(refgen):
     else:
         city = refgen.make_city(loco=False)
     ref_ref.append({'city': city})
-    year2 = refgen.make_year(random.choice(refgen.year_types))
+    if random.randint(1, 100) in range(90):
+        year2 = refgen.make_year('regular')
+    else:
+        year2 = refgen.make_year(random.choice(refgen.year_types[1:]))
     ref_ref.append({'year': year})
     return ' {}. {}. {}. {} {} - {}, {}, {}.'.format(adv, year, f, ac_type, grad_in, where, city, year2), ref_ref
 
@@ -248,27 +258,25 @@ def find_last_punct(match, start):
 def find_next_punct(match, end):
     next_token = len(match)
     for i, m in enumerate(match):
-        if i <= start:
+        if i < end:
             continue
         if is_punct(m):
-            next_token = i
+            return i
     return next_token
 
 def re_func(ref, match):
     f = re.search('{}'.format(clean(match.lower())), ref.lower())
     try:
-        return find_last_punct(match, f.start()), find_next_punct(match, f.end())
-    except:
+        return find_last_punct(ref, f.start()), find_next_punct(ref, f.end())
+    except Exception as e:
+        print(e)
         raise ValueError
 
 import datetime
 now = datetime.datetime.now()
 refgen = RefGen()
-cntr = 0
-with open('noice.jsonl', 'a+', encoding='utf-8') as f:
+with open('noice.jsonl', 'w+', encoding='utf-8') as f:
     for text, ref in make_author_title(1000):
-        if cntr % 100 == 0:
-            print("working on interation: ", cntr)
         if random.randint(1, 100) in range(90):
             ap, ref_ref = standard(refgen)
             text += ' {}'.format(ap)
@@ -295,5 +303,4 @@ with open('noice.jsonl', 'a+', encoding='utf-8') as f:
         except ValueError:
             continue
         f.write(json.dumps(ents, ensure_ascii=False)+'\n')
-        cntr += 1
 print(datetime.datetime.now()-now)
